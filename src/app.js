@@ -4,6 +4,7 @@ const createError = require("http-errors");
 const xssClean = require("xss-clean");   // it helps to sanetize request data
 const rateLimit = require("express-rate-limit");
 const userRouter = require("./routers/userRouter");
+const seedRouter = require("./routers/seedRouter");
 
 
 
@@ -26,6 +27,8 @@ app.use(express.urlencoded());
 
 
 app.use("/api/users", userRouter);
+app.use("/api/seed", seedRouter);
+
 
 //client error handaling 
 app.use((req, res, next) => {
