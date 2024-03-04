@@ -3,6 +3,7 @@ const morgan = require("morgan");
 const createError = require("http-errors");
 const xssClean = require("xss-clean");   // it helps to sanetize request data
 const rateLimit = require("express-rate-limit");
+const userRouter = require("./routers/userRouter");
 
 
 
@@ -23,11 +24,8 @@ app.use(morgan("dev"));
 app.use(express.json());
 app.use(express.urlencoded());
 
-app.get("/test", (req, res) => {
-    res.status(200).send({
-        message: "api testing is working fine"
-    })
-})
+
+app.use("/api/users", userRouter);
 
 //client error handaling 
 app.use((req, res, next) => {
