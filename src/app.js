@@ -5,6 +5,7 @@ const xssClean = require("xss-clean");   // it helps to sanetize request data
 const rateLimit = require("express-rate-limit");
 const userRouter = require("./routers/userRouter");
 const seedRouter = require("./routers/seedRouter");
+const { errorResponse } = require("./controllers/responseController");
 
 
 
@@ -38,8 +39,8 @@ app.use((req, res, next) => {
 
 // server error handaling -- all the error will come hare that not handled previous
 app.use((err, req, res, next) => {
-    return res.status(err.status || 500).json({
-        success: false,
+    return errorResponse(res, {
+        statusCode: err.status,
         message: err.message
     })
 })
