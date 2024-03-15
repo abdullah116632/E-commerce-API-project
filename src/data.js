@@ -13,6 +13,13 @@ const data = {
             password: "12359",
             phone: "56869022",
             address: "dhaka, bangladesh"
+        },
+        {
+            name: "riyad",
+            email: "riyad@gmail.com",
+            password: "15698",
+            phone: "144984",
+            address: "patuakhali, bangladesh"
         }
     ]
 }

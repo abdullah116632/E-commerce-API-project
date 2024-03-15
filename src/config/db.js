@@ -1,9 +1,9 @@
 const mongoose = require("mongoose");
-const { mongodbURL } = require("../secret");
+// const { mongodbURL } = require("../secret");
 
 const connectDatabase = async (options = {}) => {
     try{
-        await mongoose.connect(mongodbURL)
+        await mongoose.connect(process.env.MONGODB_ATLAS_URL)
         console.log("connnection to db is successfull")
 
         mongoose.connection.on("error", (error) => {
