@@ -100,7 +100,15 @@ const processRegister = async (req, res, next) => {
   try {
     const { name, email, password, phone, address } = req.body;
 
-    const imageBufferString = req.file.buffer.toString("base64");
+    const image = req.file;
+    if(!image){
+      throw createError(400, "Image file is required")
+    }
+    if(image.size > 1024 * 1024 * 2){
+      throw createError(400, "Image size is too learge it must be less then 2mb")
+    }
+
+    const imageBufferString = image.buffer.toString("base64");
 
     const userExist = await User.exists({ email });
     if (userExist) {
@@ -110,8 +118,14 @@ const processRegister = async (req, res, next) => {
       );
     }
 
+    const tokenPayload = { name, email, password, phone, address}
+
+    if(image){
+      tokenPayload.image = image
+    }
+
     const token = createJSONWebToken(
-      { name, email, password, phone, address, image: imageBufferString },
+      tokenPayload,
       process.env.JWT_ACTIVATION_KEY,
       "10m"
     );
@@ -180,10 +194,69 @@ const activateAccount = async (req, res, next) => {
   }
 };
 
+const updateUserById = async (req, res, next) => {
+  try {
+    const userId = req.params.id;
+
+    const options = {password: 0}
+    const user = await findWithId(User, userId, options)
+
+    const updateOptions = { new: true, runValidators: true, context: "query"};
+
+    let updates = {};
+    // if(req.body.name){
+    //   updates.name = req.body.name;
+    // }
+    // if(req.body.password){
+    //   updates.password = req.body.password;
+    // }
+    // if(req.body.phone){
+    //   updates.phone = req.body.phone;
+    // }
+    // if(req.body.address){
+    //   updates.address = req.body.address;
+    // }
+
+    for(let key in req.body){
+      if(["name", "password", "phone", "address"].includes(key)){
+        updates[key] = req.body[key];
+      }
+      else if(["email"].includes(key)){
+        throw new Error("Email cannot be updated")
+      }
+    }
+
+    const image = req.file;
+
+    if(image){
+      if(image.size > 1024 * 1024 * 2){
+        throw createError(400, "Image size is too learge it must be less then 2mb")
+      }
+      updates.image = image.buffer.toString("base64")
+      user.image !== "defult.png" && deleteImage(user.image)
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(userId, updates, updateOptions).select("-password")
+
+    if(!updatedUser){
+      throw createError(404, "user with this id does not exist");
+    }
+    
+    return successResponse(res, {
+      statusCode: 200,
+      message: "user was updated successfully",
+      payload: updatedUser
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   getUsers,
   getUserById,
   deleteUserById,
   processRegister,
   activateAccount,
+  updateUserById,
 };
