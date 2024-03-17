@@ -1,4 +1,5 @@
 const express = require("express");
+const cookieParser = require("cookie-parser");
 const morgan = require("morgan");
 const createError = require("http-errors");
 const xssClean = require("xss-clean");   // it helps to sanetize request data
@@ -6,6 +7,7 @@ const rateLimit = require("express-rate-limit");
 const userRouter = require("./routers/userRouter");
 const seedRouter = require("./routers/seedRouter");
 const { errorResponse } = require("./controllers/responseController");
+const authRouter = require("./routers/authRouter");
 
 
 
@@ -20,6 +22,7 @@ const rateLimiter = rateLimit({   /* this package is use for set limit of reques
 })
 
 
+app.use(cookieParser())
 app.use(rateLimiter)
 app.use(xssClean());
 app.use(morgan("dev"));
@@ -28,6 +31,7 @@ app.use(express.urlencoded());
 
 
 app.use("/api/users", userRouter);
+app.use("/api/auth", authRouter);
 app.use("/api/seed", seedRouter);
 
 

@@ -101,6 +101,7 @@ const processRegister = async (req, res, next) => {
     const { name, email, password, phone, address } = req.body;
 
     const image = req.file;
+    
     if(!image){
       throw createError(400, "Image file is required")
     }
@@ -120,9 +121,9 @@ const processRegister = async (req, res, next) => {
 
     const tokenPayload = { name, email, password, phone, address}
 
-    if(image){
-      tokenPayload.image = image
-    }
+    // if(image){
+    //   tokenPayload.image = imageBufferString
+    // }
 
     const token = createJSONWebToken(
       tokenPayload,

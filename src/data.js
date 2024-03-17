@@ -3,22 +3,22 @@ const data = {
         {
             name: "abdullah al rafi",
             email: "abdullah@gmail.com",
-            password: "123456",
-            phone: "58856898",
+            password: "123456789",
+            phone: "123596789",
             address: "sirajganj, bangladesh"
         },
         {
             name: "rafi",
             email: "rafi@gmail.com",
-            password: "12359",
+            password: "123456789",
             phone: "56869022",
             address: "dhaka, bangladesh"
         },
         {
             name: "riyad",
             email: "riyad@gmail.com",
-            password: "15698",
-            phone: "144984",
+            password: "123456789",
+            phone: "1234558989",
             address: "patuakhali, bangladesh"
         }
     ]
