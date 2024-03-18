@@ -17,7 +17,7 @@ const rateLimiter = rateLimit({   /* this package is use for set limit of reques
                                     hare using this middleware we can sent only 5 request 
                                     in one minute at particuler api endpoint where we use this middleware */
     windowMs: 1*60*1000, // 1 minute,
-    max: 5,
+    max: 50,
     message: "too many request from this IP, please try later"
 })
 

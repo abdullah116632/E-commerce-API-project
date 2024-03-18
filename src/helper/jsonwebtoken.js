@@ -14,7 +14,6 @@ const createJSONWebToken = (payload, secretKey, expiresIn) => {
         return token;
 
     }catch(error){
-        console.error("Failed to sign the jwt");
         throw error;
     }
     

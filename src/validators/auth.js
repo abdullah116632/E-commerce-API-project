@@ -43,4 +43,19 @@ const validateUserRegistration = [
     // .withMessage("User image is required"),
 ]
 
-module.exports = {validateUserRegistration};
+const validateUserLogin = [
+    body("email")
+    .trim()
+    .notEmpty()
+    .withMessage("email is required")
+    .isEmail()
+    .withMessage("Invalid email address"),
+    body("password")
+    .trim()
+    .notEmpty()
+    .withMessage("password is required")
+    .isLength({min: 6})
+    .withMessage("Password should be at least 6 characters long"),
+]
+
+module.exports = {validateUserRegistration, validateUserLogin};

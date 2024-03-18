@@ -14,7 +14,7 @@ const isLoggedIn = async (req, res, next) => {
             throw createError(401, "Invalid access token please login again")
         }
 
-        req.body.userId = decoded._id;
+        req.user = decoded.user
 
         next()
     }catch(error){
@@ -42,4 +42,18 @@ const isLoggedOut = async (req, res, next) => {
     }
 }
 
-module.exports = {isLoggedIn, isLoggedOut}
+const isAdmin = async (req, res, next) => {
+    try{
+        console.log(req.user.isAdmin)
+        console.log(req.user.name)
+        if(!req.user.isAdmin){
+            throw createError(403, "Forbidden. you must be an admin");
+        }
+        
+        next()
+    }catch(error){
+        return next(error);
+    }
+}
+
+module.exports = {isLoggedIn, isLoggedOut, isAdmin}

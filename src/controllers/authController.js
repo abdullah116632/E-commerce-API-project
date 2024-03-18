@@ -11,7 +11,8 @@ const handleLogin = async (req, res, next) => {
     try{
         const {email, password} = req.body;
 
-        const user = await User.findOne({email});
+        const user = await User.findOne({email})
+        console.log(user);
         if(!user){
             throw createError(404, "User does not exist with this email. Please register first")
         }
@@ -20,21 +21,19 @@ const handleLogin = async (req, res, next) => {
         if(!isPasswordMatch){
             throw createError(401, "Wrong password")
         }
-
         if(user.isBanned){
             throw createError(403, "You are banned please contact authority")
         }
-
         //create token cookie
-        const accessToken = createJSONWebToken({_id: user._id},process.env.JWT_ACCESS_KEY, "10m");
-
+        const accessToken = createJSONWebToken({user} ,process.env.JWT_ACCESS_KEY, "15m");
+    
         res.cookie("accessToken", accessToken, {maxAge: 15 * 60 * 1000, httpOnly: true, secure: false, sameSite: "none"})
 
-
+        const userWithoutPassword = await User.findOne({email}).select("-password")
         return successResponse(res, {
             statusCode: 200,
             message: "users loggedin successully",
-            payload: {user}
+            payload: {userWithoutPassword}
         })
     }catch(error){
         next(error)
