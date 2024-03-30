@@ -46,8 +46,6 @@ const isLoggedOut = async (req, res, next) => {
 
 const isAdmin = async (req, res, next) => {
     try{
-        console.log(req.user.isAdmin)
-        console.log(req.user.name)
         if(!req.user.isAdmin){
             throw createError(403, "Forbidden. you must be an admin");
         }

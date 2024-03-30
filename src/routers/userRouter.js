@@ -13,13 +13,13 @@ userRouter.post("/userVerify", isLoggedOut, activateAccount)
 
 
 userRouter.get("/", isLoggedIn, isAdmin, getUsers)
-userRouter.get("/:id", isLoggedIn, getUserById)
-userRouter.delete("/:id", isLoggedIn, deleteUserById)
+userRouter.get("/:id([0-9a-fA-F]{24})", isLoggedIn, getUserById)
+userRouter.delete("/:id([0-9a-fA-F]{24})", isLoggedIn, deleteUserById)
 userRouter.put("/reset-password", validateResetPassword, runValidation, handleResetPassword)
-userRouter.put("/:id", isLoggedIn, upload.single("image"), updateUserById)
-userRouter.put("/ban-user/:id", isLoggedIn, isAdmin, handleBanUserById)
-userRouter.put("/unban-user/:id", isLoggedIn, isAdmin, handleUnbanUserById)
-userRouter.put("/update-password/:id", isLoggedIn, validateUserPasswordUpdate, runValidation, handleUpdatePassword)
+userRouter.put("/:id([0-9a-fA-F]{24})", isLoggedIn, upload.single("image"), updateUserById)
+userRouter.put("/ban-user/:id([0-9a-fA-F]{24})", isLoggedIn, isAdmin, handleBanUserById)
+userRouter.put("/unban-user/:id([0-9a-fA-F]{24})", isLoggedIn, isAdmin, handleUnbanUserById)
+userRouter.put("/update-password/:id([0-9a-fA-F]{24})", isLoggedIn, validateUserPasswordUpdate, runValidation, handleUpdatePassword)
 userRouter.post("/forget-password", validateUserForgetPassword, runValidation, handleForgetPassword)
 
 
