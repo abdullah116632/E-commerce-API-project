@@ -9,7 +9,7 @@ const data = {
         },
         {
             name: "rafi",
-            email: "rafi@gmail.com",
+            email: "rafi116632@gmail.com",
             password: "123456789",
             phone: "56869022",
             address: "dhaka, bangladesh"
@@ -20,6 +20,13 @@ const data = {
             password: "123456789",
             phone: "1234558989",
             address: "patuakhali, bangladesh"
+        },
+        {
+            name: "musa",
+            email: "ahmedmusa116632@gmail.com",
+            password: "123456789",
+            phone: "1234558989",
+            address: "dumki, bangladesh"
         }
     ]
 }

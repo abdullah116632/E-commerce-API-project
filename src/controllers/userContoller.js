@@ -1,12 +1,14 @@
 const createError = require("http-errors");
 const User = require("../models/userModel");
 const jwt = require("jsonwebtoken");
+const bcrypt = require("bcryptjs")
 
 const { successResponse } = require("./responseController");
 const { findWithId } = require("../services/findItem");
 const { deleteImage } = require("../helper/deleteImage");
 const { createJSONWebToken } = require("../helper/jsonwebtoken");
 const emailWithNodeMailer = require("../helper/email");
+const { default: mongoose } = require("mongoose");
 
 const getUsers = async (req, res, next) => {
   try {
@@ -258,6 +260,9 @@ const updateUserById = async (req, res, next) => {
       payload: updatedUser,
     });
   } catch (error) {
+    if(error instanceof mongoose.Error.CastError){
+      throw createError(400, "Invalid Id")
+    }
     next(error);
   }
 };
@@ -304,6 +309,117 @@ const handleUnbanUserById = async (req, res, next) => {
       payload: updatedUser
     })
   } catch (error) {
+    if(error instanceof mongoose.Error.CastError){
+      throw createError(400, "Invalid Id")
+    }
+    next(error);
+  }
+};
+
+const handleUpdatePassword = async (req, res, next) => {
+  try {
+    const {email, oldPassword, newPassword, confirmedPassword} = req.body;
+
+    const userId = req.params.id;
+    const user = await findWithId(User, userId);
+
+    const isPasswordMatch = await bcrypt.compare(oldPassword, user.password);
+    if(!isPasswordMatch){
+      throw createError(401, "password  did not match");
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(userId, {password: newPassword}, {new: true}).select("-password")
+
+    if(!updatedUser){
+      throw createError(400, "user was not updated")
+    }
+
+    return successResponse(res, {
+      statusCode: 200,
+      message: "user was updated successfully",
+      payload: updatedUser
+    })
+  } catch (error) {
+    console.log("abdullah");
+    if(error instanceof mongoose.Error.CastError){
+      throw createError(400, "Invalid Id")
+    }
+    next(error);
+  }
+};
+
+const handleForgetPassword = async (req, res, next) => {
+  try {
+    const {email} = req.body;
+    const userData = await User.findOne({email: email})
+
+    if(!userData){
+      throw createError(404, "No user exis with this email")
+    }
+
+    const token = createJSONWebToken(
+      {email},
+      process.env.JWT_ACTIVATION_KEY,
+      "10m"
+    );
+    //prepaire email
+    const emailData = {
+      email,
+      subject: "reset password email",
+      html: `
+               <h2>Hello ${userData.name} !</h2>
+               <p>Please click hare to <a href="${process.env.CLIENT_URL}/api/users/reset-password/${token}" target="_blank"> Reset your password </a></p>
+            `,
+    };
+
+    // send email
+    try {
+      await emailWithNodeMailer(emailData);
+    } catch (error) {
+      next(createError(500, "Failed to send email reset password email"));
+      return;
+    }
+
+    return successResponse(res, {
+      statusCode: 200,
+      message: `Please go to your ${email} for reseting password`,
+      payload: token
+    });
+  } catch (error) {
+    console.log("abdullah");
+    if(error instanceof mongoose.Error.CastError){
+      throw createError(400, "Invalid Id")
+    }
+    next(error);
+  }
+};
+
+const handleResetPassword = async (req, res, next) => {
+  try {
+    const {token, password} = req.body;
+    const decoded = jwt.verify(token, process.env.JWT_ACTIVATION_KEY)
+
+    if(!decoded){
+      throw createError(400, "Invalid or expired token");
+    }
+
+    console.log(decoded);
+
+    const updatedUser = await User.findOneAndUpdate({email: decoded.email}, password, {new: true}).select("-password")
+
+    if(!updatedUser){
+      throw createError(400, "password reset fail");
+    }
+    return successResponse(res, {
+      statusCode: 200,
+      message: `password reset Successfully`,
+      payload: {}
+    });
+  } catch (error) {
+    console.log("abdullah");
+    if(error instanceof mongoose.Error.CastError){
+      throw createError(400, "Invalid Id")
+    }
     next(error);
   }
 };
@@ -316,5 +432,8 @@ module.exports = {
   activateAccount,
   updateUserById,
   handleBanUserById,
-  handleUnbanUserById
+  handleUnbanUserById,
+  handleUpdatePassword,
+  handleForgetPassword,
+  handleResetPassword
 };

@@ -3,6 +3,7 @@ const jwt = require("jsonwebtoken");
 
 
 const isLoggedIn = async (req, res, next) => {
+    
     try{
         const token = req.cookies.accessToken;
         if(!token){
@@ -13,9 +14,10 @@ const isLoggedIn = async (req, res, next) => {
         if(!decoded){
             throw createError(401, "Invalid access token please login again")
         }
+        
 
         req.user = decoded.user
-
+        console.log("abdullah");
         next()
     }catch(error){
         return next(error);
