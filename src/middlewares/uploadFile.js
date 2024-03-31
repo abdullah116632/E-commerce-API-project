@@ -1,7 +1,7 @@
 const multer = require("multer");
-const path = require("path");
+// const path = require("path");
 
-const UPLOAD_DIR = process.env.UPLOAD_DIRECTORY;
+// const UPLOAD_DIR = process.env.UPLOAD_DIRECTORY;
 const MAX_FILE_SIZE = Number(process.env.MAX_FILE_SIZE) ||  2097152 // 1024 * 1024 * 2 kB
 const ALLOWED_FILE_TYPES = ["image/jpg", "image/jpeg", "image/png"]
 
