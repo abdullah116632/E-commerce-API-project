@@ -57,9 +57,7 @@ const productSchema = new Schema({
         default: 0
     },
     image: {
-        type: Buffer,
-        contentType: String,
-        required: [true, "product image is required"]
+        type: String,
     },
     category: {
         type: Schema.Types.ObjectId,
