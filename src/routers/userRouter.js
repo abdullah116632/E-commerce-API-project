@@ -9,7 +9,7 @@ const userRouter = express.Router();
 
 
 
-userRouter.post("/register", uploadUserImage.single("image"), isLoggedOut, validateUserRegistration, runValidation, processRegister)
+userRouter.post("/register", isLoggedOut, uploadUserImage.single("image"), validateUserRegistration, runValidation,  processRegister)
 userRouter.post("/userVerify", isLoggedOut, activateAccount)
 
 

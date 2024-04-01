@@ -3,8 +3,10 @@ const mongoose = require("mongoose")
 const Product = require("../models/productModel");
 const slugify = require("slugify");
 const {deleteImage} = require("../helper/deleteImage")
+const cloudinary = require("../config/cloudinary");
 
 const { successResponse } = require("./responseController");
+const publicIdWithoutExtensionFrmUrl = require("../helper/cloudinaryHelper");
 
 
 const handleCreateProduct = async (req, res, next) => {
@@ -12,7 +14,7 @@ const handleCreateProduct = async (req, res, next) => {
     const { name, description, price, quantity, shipping, category } = req.body;
 
     const image = req.file;
-    console.log(req.file)
+    
 
     if (!image) {
       throw createError(400, "Image file is required");
@@ -44,7 +46,9 @@ const handleCreateProduct = async (req, res, next) => {
     }
 
     if(image){
-        productData.image = image.path;
+      const response = await cloudinary.uploader.upload(image.path, {folder: "ecommerceProduct"})
+      await deleteImage(image.path);
+        productData.image = response.secure_url;
     }
 
     const product = await Product.create(productData)
@@ -109,11 +113,25 @@ const handleGetProduct = async (req, res, next) => {
 };
 
 const handleDeleteProduct = async (req, res, next) => {
-    const {slug} = req.params;
-    const product = await Product.findOneAndDelete({slug})
+    try{
+      const {slug} = req.params;
+    const product = await Product.findOne({slug})
+    if(!product){
+      throw createError(404, "No product found with this id");
+    }
 
-    if(product && product.image){
-      await deleteImage(product.image)
+    if(product.image){
+      const productId = await publicIdWithoutExtensionFrmUrl(product.image)
+
+      const {result} = await cloudinary.uploader.destroy(`ecommerceProduct/${productId}`)
+      if(result !== "ok"){
+        throw new Error("product image was not deleted successfully from cloudnary. Please try again")
+      }
+    }
+    const deleteProduct = await Product.findOneAndDelete({slug})
+
+    if(deleteProduct && deleteProduct.image){
+      await deleteImage(deleteProduct.image)
     }
 
     return successResponse(res, {
@@ -121,6 +139,9 @@ const handleDeleteProduct = async (req, res, next) => {
         message: "product deleted successfully",
         payload: {}
     })
+    }catch(error){
+      next(error);
+    }
 }
 
 const handleupdateProduct = async (req, res, next) => {

@@ -7,7 +7,14 @@ const MAX_FILE_SIZE = Number(process.env.MAX_FILE_SIZE) ||  2097152 // 1024 * 10
 const ALLOWED_FILE_TYPES = ["image/jpg", "image/jpeg", "image/png"]
 
 
-const userStorage = multer.memoryStorage();
+const userStorage = multer.diskStorage({
+    destination: function (req, file, cb){
+        cb(null, USER_DIR)
+    },
+    filename: function (req, file, cb){
+        cb(null, Date.now() + "-" + file.originalname)
+    }
+});
 
 const fileFilter = (req, file, cb) => {
     if(!file.mimetype.startsWith("image/")){

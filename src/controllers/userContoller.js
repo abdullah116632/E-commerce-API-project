@@ -3,12 +3,17 @@ const User = require("../models/userModel");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs")
 
+
 const { successResponse } = require("./responseController");
 const { findWithId } = require("../services/findItem");
 const { deleteImage } = require("../helper/deleteImage");
 const { createJSONWebToken } = require("../helper/jsonwebtoken");
 const emailWithNodeMailer = require("../helper/email");
 const { default: mongoose } = require("mongoose");
+const cloudinary = require("../config/cloudinary");
+const publicIdWithoutExtensionFrmUrl = require("../helper/cloudinaryHelper");
+
+
 
 const getUsers = async (req, res, next) => {
   try {
@@ -83,6 +88,19 @@ const deleteUserById = async (req, res, next) => {
 
     const user = await findWithId(User, id, options);
 
+
+    if(user.image){
+      const publicId = await publicIdWithoutExtensionFrmUrl(user.image)
+      console.log(publicId);
+
+      const {result} = await cloudinary.uploader.destroy(`ecommerceUser/${publicId}`)
+
+      if(result !== "ok"){
+        throw new Error("User image was not deleted successfully from cloudnary. Please try again")
+      }
+    }
+
+
     // const userImagePath = user.image;
 
     // deleteImage(userImagePath);
@@ -114,17 +132,18 @@ const processRegister = async (req, res, next) => {
       );
     }
 
-    const imageBufferString = image.buffer.toString("base64");
+    // const imageBufferString = image.buffer.toString("base64");
 
     const userExist = await User.exists({ email });
     if (userExist) {
+      deleteImage(image.path);
       throw createError(
         409,
         "user with this email already exist please sign in"
       );
     }
 
-    const tokenPayload = { name, email, password, phone, address };
+    const tokenPayload = { name, email, password, phone, address, image: image.path};
 
     // if(image){
     //   tokenPayload.image = imageBufferString
@@ -179,12 +198,18 @@ const activateAccount = async (req, res, next) => {
           "user with this email already exist please sign in"
         );
       }
+      
+      const response = await cloudinary.uploader.upload(decoded.image, {folder: "ecommerceUser"})
+      await deleteImage(decoded.image);
+
+      decoded.image = response.secure_url;
 
       await User.create(decoded);
 
       return successResponse(res, {
         statusCode: 201,
         message: `User was registered successfully`,
+        payload: {decoded}
       });
     } catch (error) {
       if (error.name === "TokenExpiredError") {
